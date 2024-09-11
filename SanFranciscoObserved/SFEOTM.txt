@@ -1,0 +1,14 @@
+SFEOTM
+
+multiple years displayed on the screen showing annual change in ndvi, temperature and other properties of San Francisco.
+
+What other properties?
+	segmentation of urban, green, water
+
+What data is needed?
+	Finest grain eo data for classification
+	Any sort of temperature data?
+	Any sort of NDVI(MODIS has one)  MODIS.select('NDVI') Composting will allow to reduce noise.
+	Geometry of California/Bay area.
+
+
