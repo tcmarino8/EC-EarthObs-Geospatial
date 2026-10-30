@@ -48,9 +48,10 @@ export function deriveStatus(latestObservationTimestamp: string | null): Station
 
 export function filterToRecentWindow(
   observations: BuoyObservation[],
+  windowHours = HISTORY_WINDOW_HOURS,
   now = Date.now(),
 ): BuoyObservation[] {
-  const windowStart = now - HISTORY_WINDOW_HOURS * 60 * 60 * 1000
+  const windowStart = now - windowHours * 60 * 60 * 1000
 
   return observations
     .filter((observation) => new Date(observation.timestamp).getTime() >= windowStart)

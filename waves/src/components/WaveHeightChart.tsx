@@ -16,9 +16,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 interface WaveHeightChartProps {
   stations: StationData[]
+  windowHours: number
 }
 
-export function WaveHeightChart({ stations }: WaveHeightChartProps) {
+export function WaveHeightChart({ stations, windowHours }: WaveHeightChartProps) {
   const latestTime = Math.max(
     ...stations.map((station) =>
       station.latestObservation ? new Date(station.latestObservation.timestamp).getTime() : 0,
@@ -26,7 +27,7 @@ export function WaveHeightChart({ stations }: WaveHeightChartProps) {
   )
 
   const recentByStation = stations.map((station) =>
-    filterToRecentWindow(station.observations, latestTime || Date.now()),
+    filterToRecentWindow(station.observations, windowHours, latestTime || Date.now()),
   )
 
   const allTimestamps = Array.from(
@@ -39,7 +40,7 @@ export function WaveHeightChart({ stations }: WaveHeightChartProps) {
 
   return (
     <section className="panel">
-      <h3>Wave Height — Last 10 Hours</h3>
+      <h3>Wave Height — Last {windowHours} Hours</h3>
       <div className="chart-wrapper">
         <Line
           data={{
@@ -53,7 +54,10 @@ export function WaveHeightChart({ stations }: WaveHeightChartProps) {
                 data: allTimestamps.map((timestamp) => byTimestamp.get(timestamp) ?? null),
                 borderColor: colors[index % colors.length],
                 backgroundColor: colors[index % colors.length],
+                borderDash: [2, 4],
                 pointRadius: 2,
+                pointHoverRadius: 3,
+                tension: 0.2,
                 spanGaps: false,
               }
             }),
@@ -65,9 +69,11 @@ export function WaveHeightChart({ stations }: WaveHeightChartProps) {
               y: {
                 title: { display: true, text: 'Feet' },
                 grid: { color: 'rgba(255,255,255,0.08)' },
+                ticks: { maxTicksLimit: 4 },
               },
               x: {
                 grid: { color: 'rgba(255,255,255,0.08)' },
+                ticks: { maxTicksLimit: 4 },
               },
             },
             plugins: {

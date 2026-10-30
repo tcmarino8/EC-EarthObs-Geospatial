@@ -22,7 +22,7 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   Thin app root that renders the dashboard.
 
 - [src/components/Dashboard.tsx](./src/components/Dashboard.tsx)  
-  Main page composition: header, station cards, charts, globe, footer.
+  Main page composition: header, side-by-side station cards, arrow/swipe time-window controls, side-by-side charts, globe, footer.
 
 ## Data lifecycle
 
@@ -69,10 +69,10 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   - mean wave direction
 
 - [src/components/WaveHeightChart.tsx](./src/components/WaveHeightChart.tsx)  
-  10-hour wave height comparison chart (ft), gap-aware for missing points.
+  Wave height comparison chart (ft), gap-aware for missing points, using selected window (5/10/20 hours).
 
 - [src/components/WavePeriodChart.tsx](./src/components/WavePeriodChart.tsx)  
-  10-hour dominant period comparison chart (sec), same shared time window.
+  Dominant period comparison chart (sec), same shared selected time window.
 
 - [src/components/BuoyGlobe.tsx](./src/components/BuoyGlobe.tsx)  
   Interactive orthographic globe with:

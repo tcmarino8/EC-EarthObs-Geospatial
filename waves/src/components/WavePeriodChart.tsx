@@ -15,9 +15,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 interface WavePeriodChartProps {
   stations: StationData[]
+  windowHours: number
 }
 
-export function WavePeriodChart({ stations }: WavePeriodChartProps) {
+export function WavePeriodChart({ stations, windowHours }: WavePeriodChartProps) {
   const latestTime = Math.max(
     ...stations.map((station) =>
       station.latestObservation ? new Date(station.latestObservation.timestamp).getTime() : 0,
@@ -25,7 +26,7 @@ export function WavePeriodChart({ stations }: WavePeriodChartProps) {
   )
 
   const recentByStation = stations.map((station) =>
-    filterToRecentWindow(station.observations, latestTime || Date.now()),
+    filterToRecentWindow(station.observations, windowHours, latestTime || Date.now()),
   )
 
   const allTimestamps = Array.from(
@@ -38,7 +39,7 @@ export function WavePeriodChart({ stations }: WavePeriodChartProps) {
 
   return (
     <section className="panel">
-      <h3>Wave Period — Last 10 Hours</h3>
+      <h3>Wave Period — Last {windowHours} Hours</h3>
       <div className="chart-wrapper">
         <Line
           data={{
@@ -52,7 +53,10 @@ export function WavePeriodChart({ stations }: WavePeriodChartProps) {
                 data: allTimestamps.map((timestamp) => byTimestamp.get(timestamp) ?? null),
                 borderColor: colors[index % colors.length],
                 backgroundColor: colors[index % colors.length],
+                borderDash: [2, 4],
                 pointRadius: 2,
+                pointHoverRadius: 3,
+                tension: 0.2,
                 spanGaps: false,
               }
             }),
@@ -64,9 +68,11 @@ export function WavePeriodChart({ stations }: WavePeriodChartProps) {
               y: {
                 title: { display: true, text: 'Seconds' },
                 grid: { color: 'rgba(255,255,255,0.08)' },
+                ticks: { maxTicksLimit: 4 },
               },
               x: {
                 grid: { color: 'rgba(255,255,255,0.08)' },
+                ticks: { maxTicksLimit: 4 },
               },
             },
             plugins: {

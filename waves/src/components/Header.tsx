@@ -24,7 +24,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="header-card">
-      <h1>SURF WATCH</h1>
+      <h1>Bouy Data</h1>
       <p className="subtitle">PACIFIC COAST | NOAA BUOY MONITOR</p>
       <div className="header-meta">
         <span className={`status-pill ${dashboardState}`}>{STATE_LABELS[dashboardState]}</span>

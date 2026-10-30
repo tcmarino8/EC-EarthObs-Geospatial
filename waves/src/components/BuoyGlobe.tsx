@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { geoGraticule10, geoOrthographic, geoPath } from 'd3-geo'
+import { feature } from 'topojson-client'
+import worldLand from 'world-atlas/land-110m.json'
 import type { StationConfig } from '../config/stations'
 
 interface BuoyGlobeProps {
@@ -7,6 +9,7 @@ interface BuoyGlobeProps {
 }
 
 const MARKER_COLORS = ['#74d8d8', '#c9a5ff']
+const landFeature = feature(worldLand as Parameters<typeof feature>[0], (worldLand as Parameters<typeof feature>[0]).objects.land)
 
 export function BuoyGlobe({ stations }: BuoyGlobeProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -67,6 +70,14 @@ export function BuoyGlobe({ stations }: BuoyGlobeProps) {
       path(geoGraticule10())
       context.strokeStyle = 'rgba(255, 255, 255, 0.13)'
       context.lineWidth = 0.8
+      context.stroke()
+
+      context.beginPath()
+      path(landFeature)
+      context.fillStyle = '#3f8f46'
+      context.fill()
+      context.strokeStyle = 'rgba(18, 56, 18, 0.4)'
+      context.lineWidth = 0.6
       context.stroke()
 
       stations.forEach((station, index) => {
