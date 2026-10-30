@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Header } from './Header'
 import { StationCard } from './StationCard'
 import { WaveHeightChart } from './WaveHeightChart'
@@ -31,15 +31,28 @@ export function Dashboard() {
     DEFAULT_STATIONS[0].id,
     DEFAULT_STATIONS[1].id,
   ])
+  const [isLocatingStations, setIsLocatingStations] = useState(false)
+  const [locationSupported, setLocationSupported] = useState(true)
   const [stationSelectionNote, setStationSelectionNote] = useState(
-    'Using default stations. Enable location to find nearest stations.',
+    'Using default stations. Tap "Use my location" to load nearby stations.',
   )
 
   useEffect(() => {
     if (!navigator.geolocation) {
+      setLocationSupported(false)
+      setStationSelectionNote('Location is not available in this browser. Showing default stations.')
+    }
+  }, [])
+
+  const loadNearbyStationsFromLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationSupported(false)
       setStationSelectionNote('Location is not available in this browser. Showing default stations.')
       return
     }
+
+    setIsLocatingStations(true)
+    setStationSelectionNote('Waiting for location permission...')
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -62,14 +75,17 @@ export function Dashboard() {
               ? `Unable to load nearby stations: ${error.message}`
               : 'Unable to load nearby stations.',
           )
+        } finally {
+          setIsLocatingStations(false)
         }
       },
       () => {
+        setIsLocatingStations(false)
         setStationSelectionNote('Location access denied. Showing default stations.')
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
     )
-  }, [])
+  }
 
   const stationById = useMemo(
     () => new Map(stationOptions.map((station) => [station.id, station] as const)),
@@ -132,6 +148,14 @@ export function Dashboard() {
 
       <section className="panel">
         <h3>Select Other Stations</h3>
+        <button
+          type="button"
+          className="refresh-button"
+          onClick={loadNearbyStationsFromLocation}
+          disabled={!locationSupported || isLocatingStations}
+        >
+          {isLocatingStations ? 'Locating...' : 'Use my location'}
+        </button>
         <div className="station-picker-grid">
           <label className="station-picker-label">
             Station A
