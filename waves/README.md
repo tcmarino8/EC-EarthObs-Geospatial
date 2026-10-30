@@ -7,7 +7,7 @@ SURF WATCH is a mobile-first Progressive Web App (PWA) for monitoring real-time 
 - Two-station surf dashboard (primary station `46274` + configurable second station).
 - Real NOAA observation parsing from `realtime2/{stationId}.txt`.
 - Side-by-side buoy cards and side-by-side chart panels on larger screens.
-- Adjustable chart windows (5, 10, 20 hours) using arrow controls or swipe.
+- Adjustable chart windows (5, 10, 20 hours) by swiping directly on either chart.
 - Interactive spinning globe with buoy locations (drag to spin).
 - Auto-refresh every 10 minutes plus manual refresh.
 - Data staleness states (`online`, `delayed`, `offline`, `partial`).

@@ -1,5 +1,4 @@
-import { useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { Header } from './Header'
 import { StationCard } from './StationCard'
 import { WaveHeightChart } from './WaveHeightChart'
@@ -15,10 +14,14 @@ const WINDOW_OPTIONS = [5, 10, 20] as const
 export function Dashboard() {
   const { stations, dashboardState, isRefreshing, lastSuccessfulRefresh, refresh } = useBuoyData()
   const [windowHours, setWindowHours] = useState<(typeof WINDOW_OPTIONS)[number]>(10)
-  const pointerStartX = useRef<number | null>(null)
-  const windowIndex = WINDOW_OPTIONS.indexOf(windowHours)
-  const canIncreaseWindow = windowIndex < WINDOW_OPTIONS.length - 1
-  const canDecreaseWindow = windowIndex > 0
+  const chartAnchorTimeMs = useMemo(() => {
+    const latestObservationMs = Math.max(
+      ...stations.map((station) =>
+        station.latestObservation ? new Date(station.latestObservation.timestamp).getTime() : 0,
+      ),
+    )
+    return latestObservationMs > 0 ? latestObservationMs : Date.now()
+  }, [stations])
 
   const shiftWindow = (step: 1 | -1) => {
     setWindowHours((currentWindow) => {
@@ -29,28 +32,6 @@ export function Dashboard() {
       )
       return WINDOW_OPTIONS[nextIndex]
     })
-  }
-
-  const handleWindowPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    pointerStartX.current = event.clientX
-  }
-
-  const handleWindowPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pointerStartX.current === null) {
-      return
-    }
-
-    const deltaX = event.clientX - pointerStartX.current
-    pointerStartX.current = null
-
-    if (deltaX <= -35) {
-      shiftWindow(1)
-      return
-    }
-
-    if (deltaX >= 35) {
-      shiftWindow(-1)
-    }
   }
 
   return (
@@ -70,39 +51,25 @@ export function Dashboard() {
 
       <section className="panel">
         <h3>Time Window</h3>
-        <div
-          className="window-selector"
-          role="group"
-          aria-label="Chart window selector"
-          onPointerDown={handleWindowPointerDown}
-          onPointerUp={handleWindowPointerUp}
-        >
-          <button
-            type="button"
-            className="window-arrow"
-            onClick={() => shiftWindow(1)}
-            disabled={!canIncreaseWindow}
-            aria-label="Increase time window"
-          >
-            ←
-          </button>
-          <div className="window-readout">{windowHours} hrs</div>
-          <button
-            type="button"
-            className="window-arrow"
-            onClick={() => shiftWindow(-1)}
-            disabled={!canDecreaseWindow}
-            aria-label="Decrease time window"
-          >
-            →
-          </button>
-        </div>
-        <p className="footer-note">Swipe left for a larger window, right for a smaller window.</p>
+        <div className="window-readout">{windowHours} hrs</div>
+        <p className="footer-note">
+          Swipe left on either chart for a smaller window, right for a larger window.
+        </p>
       </section>
 
       <section className="chart-grid">
-        <WaveHeightChart stations={stations} windowHours={windowHours} />
-        <WavePeriodChart stations={stations} windowHours={windowHours} />
+        <WaveHeightChart
+          stations={stations}
+          windowHours={windowHours}
+          anchorTimeMs={chartAnchorTimeMs}
+          onWindowShift={shiftWindow}
+        />
+        <WavePeriodChart
+          stations={stations}
+          windowHours={windowHours}
+          anchorTimeMs={chartAnchorTimeMs}
+          onWindowShift={shiftWindow}
+        />
       </section>
       <BuoyGlobe stations={STATIONS} />
 

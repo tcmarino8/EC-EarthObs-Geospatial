@@ -22,7 +22,7 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   Thin app root that renders the dashboard.
 
 - [src/components/Dashboard.tsx](./src/components/Dashboard.tsx)  
-  Main page composition: header, side-by-side station cards, arrow/swipe time-window controls, side-by-side charts, globe, footer.
+  Main page composition: header, side-by-side station cards, time-window readout, side-by-side charts with swipe controls, globe, footer.
 
 ## Data lifecycle
 
