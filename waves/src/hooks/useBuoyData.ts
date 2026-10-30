@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { REFRESH_INTERVAL_MS, STATIONS } from '../config/stations'
+import { REFRESH_INTERVAL_MS } from '../config/stations'
 import { fetchStationData } from '../services/noaaService'
 import type { DashboardState, StationData } from '../types/buoy'
+import type { StationConfig } from '../config/stations'
 import { deriveStatus } from '../utils/time'
 
 interface BuoyDataResult {
@@ -32,10 +33,15 @@ function deriveDashboardState(stations: StationData[]): DashboardState {
   return 'offline'
 }
 
-export function useBuoyData(): BuoyDataResult {
+export function useBuoyData(selectedStations: StationConfig[]): BuoyDataResult {
   const [stations, setStations] = useState<StationData[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const refreshLock = useRef(false)
+  const selectedStationsRef = useRef(selectedStations)
+
+  useEffect(() => {
+    selectedStationsRef.current = selectedStations
+  }, [selectedStations])
 
   const refresh = useCallback(async () => {
     if (refreshLock.current) {
@@ -45,14 +51,15 @@ export function useBuoyData(): BuoyDataResult {
     refreshLock.current = true
     setIsRefreshing(true)
 
-    const result = await Promise.allSettled(STATIONS.map((station) => fetchStationData(station)))
+    const targetStations = selectedStationsRef.current
+    const result = await Promise.allSettled(targetStations.map((station) => fetchStationData(station)))
 
     setStations((previousStations) => {
       const previousById = new Map(
         previousStations.map((station) => [station.stationId, station] as const),
       )
 
-      return STATIONS.map((station, index) => {
+      return targetStations.map((station, index) => {
         const stationResult = result[index]
         if (stationResult.status === 'fulfilled') {
           return stationResult.value
@@ -87,6 +94,11 @@ export function useBuoyData(): BuoyDataResult {
     refreshLock.current = false
   }, [])
 
+  const selectedStationKey = useMemo(
+    () => selectedStations.map((station) => station.id).join('|'),
+    [selectedStations],
+  )
+
   useEffect(() => {
     refresh().catch((error: unknown) => {
       console.error('Initial NOAA refresh failed:', error)
@@ -112,7 +124,7 @@ export function useBuoyData(): BuoyDataResult {
       window.clearInterval(intervalId)
       window.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [refresh])
+  }, [refresh, selectedStationKey])
 
   const dashboardState = useMemo(() => deriveDashboardState(stations), [stations])
 

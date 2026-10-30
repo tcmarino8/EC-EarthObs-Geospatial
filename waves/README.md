@@ -5,6 +5,8 @@ SURF WATCH is a mobile-first Progressive Web App (PWA) for monitoring real-time 
 ## Features
 
 - Two-station surf dashboard (primary station `46274` + configurable second station).
+- "Select Other Stations" picker that uses your location to suggest nearby NOAA stations.
+- Exactly two active stations at a time (Station A and Station B).
 - Real NOAA observation parsing from `realtime2/{stationId}.txt`.
 - Side-by-side buoy cards and side-by-side chart panels on larger screens.
 - Adjustable chart windows (5, 10, 20 hours) by swiping directly on either chart.
@@ -19,6 +21,7 @@ Edit [stations.ts](./src/config/stations.ts):
 
 - `PRIMARY_STATION` defaults to `46274`.
 - `SECONDARY_STATION` is set to `46225`.
+- `DEFAULT_STATIONS` are used when location is unavailable/denied.
 
 ## Development
 
@@ -37,6 +40,7 @@ npm run preview
 ## Optional NOAA Proxy (Vercel)
 
 The frontend tries [/api/station](./api/station.ts) first, then falls back to direct NOAA fetch.
+Nearby station discovery uses [/api/stations](./api/stations.ts), which proxies NOAA active-station XML.
 
 Deploying on Vercel will automatically expose this serverless function and improve reliability when direct NOAA CORS behavior changes.
 

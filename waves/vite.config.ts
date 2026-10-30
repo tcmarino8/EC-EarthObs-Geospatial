@@ -21,7 +21,10 @@ function noaaDevProxyPlugin() {
       }
     }) {
       server.middlewares.use(async (req, res, next) => {
-        if (!req.url?.startsWith('/api/station')) {
+        const requestUrl = req.url ? new URL(req.url, 'http://localhost') : null
+        const pathname = requestUrl?.pathname ?? ''
+
+        if (pathname !== '/api/station' && pathname !== '/api/stations') {
           next()
           return
         }
@@ -33,8 +36,31 @@ function noaaDevProxyPlugin() {
           return
         }
 
-        const requestUrl = new URL(req.url, 'http://localhost')
-        const stationId = requestUrl.searchParams.get('stationId') ?? ''
+        if (pathname === '/api/stations') {
+          try {
+            const upstream = await fetch('https://www.ndbc.noaa.gov/activestations.xml', {
+              headers: {
+                Accept: 'application/xml,text/xml',
+              },
+            })
+
+            const body = await upstream.text()
+            res.statusCode = upstream.status
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+            res.end(body)
+          } catch (error) {
+            res.statusCode = 502
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+            res.end(
+              error instanceof Error
+                ? `Failed to fetch station catalog: ${error.message}`
+                : 'Failed to fetch station catalog.',
+            )
+          }
+          return
+        }
+
+        const stationId = requestUrl?.searchParams.get('stationId') ?? ''
 
         if (!/^\d{5}$/.test(stationId)) {
           res.statusCode = 400

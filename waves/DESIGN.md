@@ -22,7 +22,7 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   Thin app root that renders the dashboard.
 
 - [src/components/Dashboard.tsx](./src/components/Dashboard.tsx)  
-  Main page composition: header, side-by-side station cards, time-window readout, side-by-side charts with swipe controls, globe, footer.
+  Main page composition: header, "Select Other Stations" picker, side-by-side station cards, time-window readout, side-by-side charts with swipe controls, globe, footer.
 
 ## Data lifecycle
 
@@ -32,6 +32,7 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   - 10-minute auto refresh
   - manual refresh
   - foreground/visibility refresh
+  - dynamic selected station set (exactly two stations)
   - per-station failure isolation and last-good-data retention
 
 - [src/services/noaaService.ts](./src/services/noaaService.ts)  
@@ -49,10 +50,17 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   - rejects malformed rows
   - deduplicates and sorts observations
 
+- [src/services/stationCatalogService.ts](./src/services/stationCatalogService.ts)  
+  Location-based station discovery:
+  - loads NOAA active station XML
+  - parses buoy station metadata
+  - computes nearest stations by geodesic distance
+  - returns top nearby options for selection
+
 ## Configuration and types
 
 - [src/config/stations.ts](./src/config/stations.ts)  
-  Station IDs and labels (`46274`, `46225`), station coordinates, plus refresh/history window constants.
+  Default station IDs and labels (`46274`, `46225`), station coordinates, station-selection limit, plus refresh/history window constants.
 
 - [src/types/buoy.ts](./src/types/buoy.ts)  
   Shared TypeScript interfaces for observations and station status.
@@ -100,9 +108,13 @@ SURF WATCH is a React + TypeScript single-page PWA with this flow:
   Vite config with:
   - PWA manifest/service worker setup
   - local dev middleware for `/api/station`
+  - local dev middleware for `/api/stations`
 
 - [api/station.ts](./api/station.ts)  
   Vercel serverless proxy endpoint with station validation, timeout handling, and cache headers.
+
+- [api/stations.ts](./api/stations.ts)  
+  Vercel serverless proxy endpoint for NOAA active-station catalog XML.
 
 ## 3) Data model snapshot
 

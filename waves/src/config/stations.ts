@@ -19,7 +19,8 @@ export const SECONDARY_STATION: StationConfig = {
   longitude: -117.391,
 }
 
-export const STATIONS: StationConfig[] = [PRIMARY_STATION, SECONDARY_STATION]
+export const DEFAULT_STATIONS: StationConfig[] = [PRIMARY_STATION, SECONDARY_STATION]
+export const STATION_SELECTION_LIMIT = 2
 
 export const REFRESH_INTERVAL_MS = 10 * 60 * 1000
 export const HISTORY_WINDOW_HOURS = 10
